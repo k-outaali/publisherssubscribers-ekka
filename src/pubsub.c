@@ -1,11 +1,9 @@
 #include <errno.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "../include/pubsub.h"
 
-#define MAX_NUM_SUBS 4
-#define MAX_NUM_PUBS 1
-#define MAX_MSG_SIZE 1024
 
 int num_subs = 0;
 int num_pubs = 0;
@@ -55,7 +53,7 @@ int pubsub_write(int p_fd, char* p_message, int p_size){
     if(p_size < 1 || p_size > MAX_MSG_SIZE){
         return -1;
     }
-    if(strlen(p_message) + 1 != p_size){
+    if((int)(strlen(p_message) + 1) != p_size){
         return -1;
     }
     return write(p_fd, p_message, p_size);
