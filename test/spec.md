@@ -7,7 +7,7 @@
 ``open`` permet à un subscriber d'ouvrir la catégorie ``p_categorie`` avec l'option ``O_RDONLY`` spécifiée grâce au paramètre ``p_options``. Si la catégorie est ouverte normalement, ``open`` retourne le descripteur de fichier permettant au subscriber de recevoir les messages.  
 #### Test
 Vérifier que l'utilisateur est un subscriber.
-Vérifier valeur de retour.
+Vérifier valeur de retour (file descriptor).
 </br>
 
 ### V1-E2
@@ -23,6 +23,7 @@ Ouvrir une catégorie plus de 4 fois et vérifier le résultat.
 #### Description
 Pour ``open``, comme usuellement avec Unix, ``p_mode`` spécifie les permissions d'accès en fonction de l'identité de propriétaire du processus (``user``, ``group`` et ``other``). 
 #### Test
+Vérifier avec 4 permissions (``user``, ``group``, ``other`` et une autre)
 </br>
 
 
@@ -30,7 +31,7 @@ Pour ``open``, comme usuellement avec Unix, ``p_mode`` spécifie les permissions
 #### Description
 ``open`` retourne -1 lors d'un appel pour un fichier qui n'existe pas.
 #### Test
-Test appeler fichier qui existe et un fichier qui n'existe pas.
+Valeur de retour pour un fichier qui n'existe pas (-1).
 </br>
 
 
@@ -38,7 +39,7 @@ Test appeler fichier qui existe et un fichier qui n'existe pas.
 #### Description
 ``open`` retourne -1 lors d'un appel avec une option différente des valeurs ``O_RDONLY`` et ``O_WRONLY``
 #### Test
-Vérifier les valeurs de retour avec ``O_RDONLY``, ``O_WRONLY`` et une autre valeur.
+Valeur de retour pour un parametre différent de ``O_RDONLY`` ou ``O_WRONLY`` (-1).
 </br>
 
 
@@ -46,7 +47,7 @@ Vérifier les valeurs de retour avec ``O_RDONLY``, ``O_WRONLY`` et une autre val
 #### Description
 Tout appel à ``ioctl`` retourne -1
 #### Test
-Vérifier valeur de retour.
+Vérifier valeur de retour (-1).
 </br>
 
 
@@ -54,7 +55,7 @@ Vérifier valeur de retour.
 #### Description
 ``close`` permet de terminer les communications pour le descripteur ``p_fd``. ``close`` retourne 0 si la fermeture s'est déroulée correctement.
 #### Test
-Vérifier valeur de retour pour une bonne fermeture.
+Vérifier valeur de retour pour une bonne fermeture (0).
 </br>
 
 
@@ -62,7 +63,7 @@ Vérifier valeur de retour pour une bonne fermeture.
 #### Description
 ``close`` retourne -1 lors d'un appel si le paramètre ``p_fd`` ne correspond à aucun fichier ouvert.
 #### Test
-Vérifier valeur de retour pour un fichier inexistant.
+Vérifier valeur de retour pour un fichier non ouvert (-1).
 </br>
 
 
@@ -78,7 +79,7 @@ Vérifier valeur de retour pour différente taille de message.
 #### Description
 ``write`` retourne -1 lors d'un appel si ``p_size`` est strictement inférieur à 1, i.e. un message doit avoir une taille minimale de 1 caractère \0 compris.
 #### Test
-Vérifier valeur de retour pour différente taille de message.
+Vérifier valeur de retour pour `p_size` inférieur à 1 (-1).
 </br>
 
 
@@ -111,7 +112,7 @@ Vérifier valeur de retour pour un `p_size` inférieur à 1.
 #### Description
 ``read`` retourne -1 lors d'un appel si le paramètre ``p_fd`` ne désigne pas un fichier ouvert.
 #### Test
-Vérifier valeur de retour pour différente valeur de `p_fd`, (fichier existant et non existant).
+Vérifier valeur de retour pour un fichier non existant (-1).
 </br>
 
 
@@ -238,3 +239,42 @@ Les messages sont stockés dans la file d’attente associée à la catégorie j
 Lorsque la file d’attente associée à une catégorie comporte plusieurs messages, alors pour tous les subscribers l’ordre de lecture des messages est l’ordre d’arrivée des messages dans le canal. En d’autres termes, tous les subscribers reçoivent toutes les messages dans le même ordre qui est l’ordre d’arrivée dans le canal.
 #### Test
 </br>
+
+
+## Test
+
+### Fonction open
+Vérifier que l'utilisateur est un subscriber.
+Vérifier valeur de retour (file descriptor).
+Ouvrir une catégorie plus de 4 fois et vérifier le résultat (-1).
+Valeur de retour pour un fichier qui n'existe pas (-1).
+Valeur de retour pour un parametre différent de ``O_RDONLY`` ou ``O_WRONLY`` (-1).
+Vérifier avec 4 permissions (``user``, ``group``, ``other`` et une autre)
+
+### Fonction write
+Vérifier valeur de retour pour différente taille de message.
+Vérifier valeur de retour pour `p_size` inférieur à 1 (-1).
+Vérifier valeur de retour pour un fichier pas ouvert (-1).
+
+### Fonction read
+Vérifier si `p_size` égale la taille du message.
+Vérifier la valeur de retour (taille msg lu).
+Vérifier valeur de retour pour un `p_size` inférieur à 1 (-1).
+Vérifier valeur de retour pour un fichier non existant (-1).
+Vérifier valeur de retour si nombre de caractère lu différent de ``p_size`` (-1).
+Vérifier la valeur de retour de `read` (égale au nombre de caractère effectivement lu, test sur pls taille de message).
+
+### Fonction ioctl
+Vérifier valeur de retour (-1).
+
+### Fonction close
+Vérifier valeur de retour pour une bonne fermeture (0).
+Vérifier valeur de retour pour un fichier non ouvert (-1).
+
+### Global
+Vérifier que le message est bien inférieur à 1024. (pour read et write)
+Vérifier qu'un subscriber ne peut pas écrire.
+Vérifier qu'un subscriber peut lire.
+Vérifier qu'un publisher peut écrire.
+Vérifier qu'un publisher ne peut pas lire.
+Vérifier que errno est positionnée pour chaque erreur signalée.
