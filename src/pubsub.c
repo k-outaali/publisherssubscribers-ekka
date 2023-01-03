@@ -7,12 +7,22 @@
 
 int num_subs = 0;
 int num_pubs = 0;
+int read_fds[MAX_NUM_SUBS];
+int write_fds[MAX_NUM_PUBS];
 
 int pubsub_open(char* p_category, int p_options, int p_mode){
-
+    int ret;
     if(p_options == O_RDONLY){
         if(num_subs < MAX_NUM_SUBS ){
-            num_subs++;
+            ret = open(p_category, p_options, p_mode);
+            if(ret != -1){
+                num_subs++;
+                read_fds[num_subs] = ret;
+            }
+            else {
+                return -1;
+            }
+            
         }
         else{
             return -1;
@@ -20,7 +30,14 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
     }
     else if(p_options == O_WRONLY){
             if(num_pubs < MAX_NUM_PUBS ){
-                num_pubs++;
+                ret = open(p_category, p_options, p_mode);
+                if(ret != -1){
+                    num_pubs++;
+                    write_fds[num_pubs] = ret;
+                }
+                else {
+                    return -1;
+                }
             }
             else{
                 return -1;
@@ -31,7 +48,7 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
         return -1;
     }
     
-    return open(p_category, p_options, p_mode);
+    return ret;
 
 }
 
@@ -61,7 +78,18 @@ int pubsub_write(int p_fd, char* p_message, int p_size){
 
 int pubsub_close(int p_fd){
 
-    num_subs--;
+    for(int i = 0; i < MAX_NUM_SUBS; i++){
+        if(p_fd == read_fds[i]){
+            num_subs--;
+            return close(p_fd); 
+        }
+    }
+    for(int i = 0; i < MAX_NUM_PUBS; i++){
+        if(p_fd == write_fds[i]){
+            num_pubs--;
+            return close(p_fd); 
+        }
+    }
     return close(p_fd);
 
 }
