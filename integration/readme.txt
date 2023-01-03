@@ -1,5 +1,7 @@
 -faire make pour compiler 
 -faire sudo insmod pubsub.ko pour charger le module dans le noyau.
--faire sudo dmesg pour tracer le chargement de module 
+-faire sudo dmesg pour tracer le chargement de module.
+-faire mknod /dev/pubsub c 190 0  pour cree un fichier special pour le module.
+-executer test.c pour verifier que le module est bien charger dans le noyau.
 -faire sudo rmmod pubsub.ko pour decharger le module de noyau.
 -faire sudo dmesg pour tracer le dechargement de module.
