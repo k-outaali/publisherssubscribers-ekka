@@ -17,6 +17,8 @@ int pubsub_close(int p_fd);
 
 int pubsub_ioctl(int p_fd, int p_request, int p_options);
 
+void pubsub_reset();
+
 
 
 #endif // PUBSUB_H

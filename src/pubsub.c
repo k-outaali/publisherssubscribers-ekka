@@ -98,3 +98,14 @@ int pubsub_ioctl(int p_fd, int p_request, int p_options){
 
     return -1;
 }
+
+void pubsub_reset(){
+    num_subs = 0;
+    num_pubs = 0;
+    for(int i = 0; i < MAX_NUM_SUBS; i++){
+        read_fds[i] = 0;
+    }
+    for(int i = 0; i < MAX_NUM_PUBS; i++){
+        write_fds[i] = 0;
+    }
+}
