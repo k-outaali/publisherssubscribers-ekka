@@ -1,10 +1,9 @@
 #include <errno.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "../include/pubsub.h"
 
-#define MAX_NUM_SUBS 4
-#define MAX_NUM_PUBS 1
 
 int num_subs = 0;
 int num_pubs = 0;
@@ -38,14 +37,30 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
 
 int pubsub_read(int p_fd, char* p_message, int p_size){
 
+    if(p_size < 1 || p_size > MAX_MSG_SIZE){
+        return -1;
+    }
+    int size = read(p_fd, p_message, p_size);
+
+    if(size != p_size){
+        return -1;
+    }
+    return size;
 }
 
 int pubsub_write(int p_fd, char* p_message, int p_size){
 
+    if(p_size < 1 || p_size > MAX_MSG_SIZE){
+        return -1;
+    }
+    if((int)(strlen(p_message) + 1) != p_size){
+        return -1;
+    }
+    return write(p_fd, p_message, p_size);
 }
 
 int pubsub_close(int p_fd){
-    
+
     num_subs--;
     return close(p_fd);
 
@@ -53,4 +68,5 @@ int pubsub_close(int p_fd){
 
 int pubsub_ioctl(int p_fd, int p_request, int p_options){
 
+    return -1;
 }

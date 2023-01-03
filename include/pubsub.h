@@ -3,6 +3,9 @@
 #ifndef PUBSUB_H
 #define PUBSUB_H
 
+#define MAX_NUM_SUBS 4
+#define MAX_NUM_PUBS 1
+#define MAX_MSG_SIZE 1024
 
 int pubsub_open(char* p_category, int p_options, int p_mode);
 
