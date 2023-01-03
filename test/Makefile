@@ -1,4 +1,4 @@
 all: testv1
 
 testv1:
-	gcc -o test test.c -lcunit
+	gcc ../build/pubsub.o -o test test.c -lcunit
