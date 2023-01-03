@@ -166,6 +166,7 @@ Vérifier que errno est positionnée pour chaque erreur signalée.
 #### Description
 La taille maximale des messages est par défaut de 1024 caractères.
 #### Test
+Test sur différentes taille.
 </br>
 
 
@@ -173,6 +174,7 @@ La taille maximale des messages est par défaut de 1024 caractères.
 #### Description
 Le nombre maximum de publishers a par défaut la valeur 10.
 #### Test
+Test dépasser 10 publishers.
 </br>
 
 
@@ -180,6 +182,7 @@ Le nombre maximum de publishers a par défaut la valeur 10.
 #### Description
 Le nombre maximum de subscribers a par défaut la valeur 10.
 #### Test
+Test dépasser 10 subscribers.
 </br>
 
 
@@ -187,6 +190,7 @@ Le nombre maximum de subscribers a par défaut la valeur 10.
 #### Description
 Tout appel de la fonction ``ioctl`` après l’ouverture du fichier avec ``open`` retourne -1.
 #### Test
+Test valeur de retour `ioctl`.
 </br>
 
 
@@ -194,6 +198,7 @@ Tout appel de la fonction ``ioctl`` après l’ouverture du fichier avec ``open`
 #### Description
 Tout appel à la fonction ``ioctl`` avec une valeur <=0 pour l’argument ``p_options`` retourne -1.
 #### Test
+Test valeur de retour `ioctl` pour différent `p_options`.
 </br>
 
 
@@ -201,6 +206,7 @@ Tout appel à la fonction ``ioctl`` avec une valeur <=0 pour l’argument ``p_op
 #### Description
 Tout appel à la fonction ``ioctl`` avec une valeur différente de ``PS_MSGSIZE``, ``PS_NPUBLISHER`` et ``PS_NSUBSCRIBER`` pour l’argument ``p_request`` retourne -1.
 #### Test
+Test valeur de retour `ioctl` pour différent `p_request`.
 </br>
 
 
@@ -208,6 +214,8 @@ Tout appel à la fonction ``ioctl`` avec une valeur différente de ``PS_MSGSIZE`
 #### Description
 ``ioctl`` modifie la taille des identifiants lorsque la fonction est invoquée avec la valeur ``PS_MSGSIZE`` pour l’argument ``p_request``. La nouvelle taille maximale des messages est alors donnée par l’argument ``p_options``. En cas de succès, ``ioctl`` retourne 0. 
 #### Test
+Test valeur de retour `ioctl` pour `PS_MSGSIZE`.
+Test ecriture et lecture pour la nouvelle taille.
 </br>
 
 
@@ -215,6 +223,8 @@ Tout appel à la fonction ``ioctl`` avec une valeur différente de ``PS_MSGSIZE`
 #### Description
 ``ioctl`` modifie la taille des identifiants lorsque la fonction est invoquée avec la valeur ``PS_ NPUBLISHER`` pour l’argument ``p_request``. Le nouveau nombre maximum de publishers est alors donné par l’argument ``p_options``. En cas de succès, ``ioctl`` retourne 0.
 #### Test
+Test valeur de retour `ioctl` pour `PS_ NPUBLISHER`.
+Test dépasser le nouveau nombre max de publishers.
 </br>
 
 
@@ -222,6 +232,8 @@ Tout appel à la fonction ``ioctl`` avec une valeur différente de ``PS_MSGSIZE`
 #### Description
 ``ioctl`` modifie la taille des identifiants lorsque la fonction est invoquée avec la valeur ``PS_NSUBSCRIBER`` pour l’argument ``p_request``. Le nouveau nombre maximum de subscribers est alors donné par l’argument ``p_options``. En cas de succès, ``ioctl`` retourne 0.
 #### Test
+Test valeur de retour `ioctl` pour `PS_NSUBSCRIBER`.
+Test dépasser le nouveau nombre max subscribers.
 </br>
 
 
