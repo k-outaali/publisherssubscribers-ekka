@@ -1,5 +1,0 @@
--faire make pour compiler 
--faire sudo insmod pubsub.ko pour charger le module dans le noyau.
--faire sudo dmesg pour tracer le chargement de module 
--faire sudo rmmod pubsub.ko pour decharger le module de noyau.
--faire sudo dmesg pour tracer le dechargement de module.
