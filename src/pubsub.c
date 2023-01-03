@@ -129,15 +129,15 @@ void pubsub_reset(){
 
 
 char *pubsub_get_error(){
-	char *ret = strerror(errno);
-	if( strstr(ret, "Unknown error") != NULL){
-		for(int i = 0; i < 2; i++){
-			if(err[i] == errno){
-				return serr[i];
-			}
-		}
-	}
-	else{
-		return ret;
-	}
+    char *ret = strerror(errno);
+    if( strstr(ret, "Unknown error") != NULL){
+        for(int i = 0; i < sizeof(err)/sizeof(int); i++){
+            if(err[i] == errno){
+                return serr[i];
+            }
+        }
+    }
+    else{
+        return ret;
+    }
 }
