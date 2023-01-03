@@ -10,6 +10,9 @@ int num_pubs = 0;
 int read_fds[MAX_NUM_SUBS];
 int write_fds[MAX_NUM_PUBS];
 
+int err[] = {12, 999};
+char *serr[] = {"err 12", "err 999"};
+
 int pubsub_open(char* p_category, int p_options, int p_mode){
     int ret;
     if(p_options == O_RDONLY){
@@ -108,4 +111,19 @@ void pubsub_reset(){
     for(int i = 0; i < MAX_NUM_PUBS; i++){
         write_fds[i] = 0;
     }
+}
+
+
+char *pubsub_get_error(){
+	char *ret = strerror(errno);
+	if( strstr(ret, "Unknown error") != NULL){
+		for(int i = 0; i < 2; i++){
+			if(err[i] == errno){
+				return serr[i];
+			}
+		}
+	}
+	else{
+		return ret;
+	}
 }
