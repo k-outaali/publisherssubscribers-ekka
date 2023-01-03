@@ -10,8 +10,15 @@ int num_pubs = 0;
 int read_fds[MAX_NUM_SUBS];
 int write_fds[MAX_NUM_PUBS];
 
-int err[] = {12, 999};
-char *serr[] = {"err 12", "err 999"};
+int err[] = {150, 151, 152, 153, 154, 155};
+char *serr[] = {
+ "ERR MAX NB SUBS",
+ "ERR MAX NB PUBS", 
+ "ERR NOT READ OR WRITE ONLY (wrong p_option)", 
+ "ERR dans READ p_size < 1 ou >= 1024",
+ "ERR dans WRITE p_size != strlen(p_message) + 1",
+ "ERR IOCTL (always return -1)"
+};
 
 int pubsub_open(char* p_category, int p_options, int p_mode){
     int ret;
@@ -28,6 +35,7 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
             
         }
         else{
+            errno = 150;
             return -1;
         }  
     }
@@ -43,11 +51,13 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
                 }
             }
             else{
+                errno = 151;
                 return -1;
             }  
     }
     else 
     {
+        errno = 152;
         return -1;
     }
     
@@ -58,6 +68,7 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
 int pubsub_read(int p_fd, char* p_message, int p_size){
 
     if(p_size < 1 || p_size > MAX_MSG_SIZE){
+        errno = 153;
         return -1;
     }
     int size = read(p_fd, p_message, p_size);
@@ -71,9 +82,11 @@ int pubsub_read(int p_fd, char* p_message, int p_size){
 int pubsub_write(int p_fd, char* p_message, int p_size){
 
     if(p_size < 1 || p_size > MAX_MSG_SIZE){
+        errno = 153;
         return -1;
     }
     if((int)(strlen(p_message) + 1) != p_size){
+        errno = 154;
         return -1;
     }
     return write(p_fd, p_message, p_size);
@@ -99,6 +112,7 @@ int pubsub_close(int p_fd){
 
 int pubsub_ioctl(int p_fd, int p_request, int p_options){
 
+    errno = 155;
     return -1;
 }
 
