@@ -21,7 +21,7 @@ char *serr[] = {
  "ERR dans READ p_size < 1 ou >= 1024",
  "ERR dans WRITE p_size != strlen(p_message) + 1",
  "ERR called ioctl with p_option value less than 1"
- "ERR called ioctl after opening a file"
+ "ERR called ioctl after opening a file only by subscribers"
  "ERR called ioctl with p_request not in {max_subs, max_pubs, max_size}"
 };
 
@@ -120,12 +120,6 @@ int pubsub_ioctl(int p_fd, int p_request, int p_options){
     if(p_options <= 0){
         errno = 155;
         return -1;
-    }
-    for(int i = 0; i < max_pubs; i++){
-        if (p_fd == write_fds[i]){
-            errno = 156;
-            return -1;
-        }  
     }
     for(int i = 0; i < max_subs; i++){
         if (p_fd == read_fds[i]){
