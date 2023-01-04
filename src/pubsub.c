@@ -12,6 +12,17 @@ int write_fds[MAX_NUM_PUBS];
 int max_subs = MAX_NUM_SUBS;
 int max_pubs = MAX_NUM_SUBS;
 int max_size = MAX_MSG_SIZE;
+int err[] = {150, 151, 152, 153, 154, 155, 156, 157};
+char *serr[] = {
+ "ERR MAX NB SUBS",
+ "ERR MAX NB PUBS", 
+ "ERR NOT READ OR WRITE ONLY (wrong p_option)", 
+ "ERR dans READ p_size < 1 ou >= 1024",
+ "ERR dans WRITE p_size != strlen(p_message) + 1",
+ "ERR called ioctl with p_option value less than 1"
+ "ERR called ioctl after opening a file"
+ "ERR called ioctl with p_request not in {max_subs, max_pubs, max_size}"
+};
 
 int pubsub_open(char* p_category, int p_options, int p_mode){
     int ret;
@@ -28,6 +39,7 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
             
         }
         else{
+            errno = 150;
             return -1;
         }  
     }
@@ -43,11 +55,13 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
                 }
             }
             else{
+                errno = 151;
                 return -1;
             }  
     }
     else 
     {
+        errno = 152;
         return -1;
     }
     
@@ -58,6 +72,7 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
 int pubsub_read(int p_fd, char* p_message, int p_size){
 
     if(p_size < 1 || p_size > MAX_MSG_SIZE){
+        errno = 153;
         return -1;
     }
     int size = read(p_fd, p_message, p_size);
@@ -71,9 +86,11 @@ int pubsub_read(int p_fd, char* p_message, int p_size){
 int pubsub_write(int p_fd, char* p_message, int p_size){
 
     if(p_size < 1 || p_size > MAX_MSG_SIZE){
+        errno = 153;
         return -1;
     }
     if((int)(strlen(p_message) + 1) != p_size){
+        errno = 154;
         return -1;
     }
     return write(p_fd, p_message, p_size);
@@ -100,10 +117,20 @@ int pubsub_close(int p_fd){
 int pubsub_ioctl(int p_fd, int p_request, int p_options){
 
     if(p_options <= 0){
+        errno = 155;
         return -1;
     }
-    if(p_request != MAX_MSG_SIZE && p_request != MAX_NUM_PUBS && p_request != MAX_NUM_SUBS){
-        return -1;
+    for(int i = 0; i < max_pubs; i++){
+        if (p_fd == write_fds[i]){
+            errno = 156;
+            return -1;
+        }  
+    }
+    for(int i = 0; i < max_subs; i++){
+        if (p_fd == read_fds[i]){
+            errno = 156;
+            return -1;
+        }  
     }
     if(p_request == MAX_MSG_SIZE){
         max_size = p_options;
@@ -118,6 +145,7 @@ int pubsub_ioctl(int p_fd, int p_request, int p_options){
         return 0;
     }
     else{
+        errno = 157;
         return -1;
     }   
 }
@@ -130,5 +158,19 @@ void pubsub_reset(){
     }
     for(int i = 0; i < MAX_NUM_PUBS; i++){
         write_fds[i] = 0;
+    }
+}
+
+char *pubsub_get_error(){
+    char *ret = strerror(errno);
+    if( strstr(ret, "Unknown error") != NULL){
+        for(int i = 0; i < sizeof(err)/sizeof(int); i++){
+            if(err[i] == errno){
+                return serr[i];
+            }
+        }
+    }
+    else{
+        return ret;
     }
 }

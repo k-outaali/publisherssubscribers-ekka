@@ -19,4 +19,6 @@ int pubsub_ioctl(int p_fd, int p_request, int p_options);
 
 void pubsub_reset();
 
+char *pubsub_get_error();
+
 #endif // PUBSUB_H
