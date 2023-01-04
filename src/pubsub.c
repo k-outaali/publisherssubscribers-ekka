@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "../include/pubsub.h"
 
@@ -164,13 +165,11 @@ void pubsub_reset(){
 char *pubsub_get_error(){
     char *ret = strerror(errno);
     if( strstr(ret, "Unknown error") != NULL){
-        for(int i = 0; i < sizeof(err)/sizeof(int); i++){
+        for(int i = 0; i < (int)(sizeof(err)/sizeof(int)); i++){
             if(err[i] == errno){
                 return serr[i];
             }
         }
-    }
-    else{
-        return ret;
-    }
+    }   
+    return ret;
 }
