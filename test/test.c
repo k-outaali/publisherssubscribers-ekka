@@ -22,18 +22,16 @@ void test_open() {
     CU_ASSERT(-1 == pubsub_open(category, -3, 777));
     CU_ASSERT(errno == 152);
 
-    CU_ASSERT(-1 != pubsub_open(category, O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
-    for (int i = 0; i < 9; i++)
-        pubsub_open(category, O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+    CU_ASSERT(-1 != pubsub_open(category, O_WRONLY, 777));
     CU_ASSERT(-1 == pubsub_open(category, O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
     CU_ASSERT(errno == 151);
 
-    CU_ASSERT(-1 == pubsub_open("category", O_RDONLY, S_IRUSR | S_IWUSR));
-    CU_ASSERT(errno == ENOENT);
     CU_ASSERT(-1 != pubsub_open(category, O_RDONLY, S_IRUSR | S_IWUSR));
-    for (int i = 0; i < 9; i++)
-        pubsub_open(category, O_RDONLY, S_IRUSR | S_IWUSR);
-    
+    for (int i = 0; i < 2; i++)
+        pubsub_open(category, O_RDONLY, S_IRGRP | S_IWGRP);
+    CU_ASSERT(-1 == pubsub_open("category", O_RDONLY, -1));
+    CU_ASSERT(errno == ENOENT);
+    CU_ASSERT(-1 != pubsub_open(category, O_RDONLY, -1));
     CU_ASSERT(-1 == pubsub_open(category, O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
     CU_ASSERT(errno == 150);
 }
