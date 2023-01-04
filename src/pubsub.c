@@ -132,6 +132,7 @@ int pubsub_ioctl(int p_fd, int p_request, int p_options){
             goto exist;  
         }  
     }
+    errno = 156;
     return -1;
     exist:
     if(p_request == PS_MSG){
