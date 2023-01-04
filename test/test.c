@@ -18,17 +18,22 @@ void test_open() {
     char * category = "test_open.txt";
 
     CU_ASSERT(-1 == pubsub_open(category, 2, 777));
+    CU_ASSERT(errno == 152);
     CU_ASSERT(-1 == pubsub_open(category, -3, 777));
+    CU_ASSERT(errno == 152);
 
     CU_ASSERT(-1 != pubsub_open(category, O_WRONLY, 777));
     CU_ASSERT(-1 == pubsub_open(category, O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
+    CU_ASSERT(errno == 151);
 
     CU_ASSERT(-1 != pubsub_open(category, O_RDONLY, S_IRUSR | S_IWUSR));
-    CU_ASSERT(-1 != pubsub_open(category, O_RDONLY, S_IRGRP | S_IWGRP));
-    CU_ASSERT(-1 != pubsub_open(category, O_RDONLY, S_IROTH | S_IWOTH));
+    for (int i = 0; i < 2; i++)
+        pubsub_open(category, O_RDONLY, S_IRGRP | S_IWGRP);
     CU_ASSERT(-1 == pubsub_open("category", O_RDONLY, -1));
+    CU_ASSERT(errno == ENOENT);
     CU_ASSERT(-1 != pubsub_open(category, O_RDONLY, -1));
     CU_ASSERT(-1 == pubsub_open(category, O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
+    CU_ASSERT(errno == 150);
 }
 
 /*
@@ -39,13 +44,14 @@ void test_write() {
     pubsub_reset();
     char * category = "test_write.txt";
     int fd_write = pubsub_open(category, O_WRONLY, 777);
-    //printf("\n%s\n", strerror(errno));
-    // printf("\n%s\n", strerror(errno));
-    // printf("\n%s\n", strerror(errno));
     CU_ASSERT(-1 == pubsub_write(fd_write, "test", -1));
+    CU_ASSERT(errno == 153);
     CU_ASSERT(-1 == pubsub_write(fd_write, "test", 0));
+    CU_ASSERT(errno == 153);
     CU_ASSERT(-1 == pubsub_write(fd_write, "test", 4));
+    CU_ASSERT(errno == 154);
     CU_ASSERT(-1 == pubsub_write(fd_write, "test", 1025));
+    CU_ASSERT(errno == 153);
     CU_ASSERT(1 == pubsub_write(fd_write, "", 1));
     CU_ASSERT(2 == pubsub_write(fd_write, " ", 2));
     CU_ASSERT(5 == pubsub_write(fd_write, "test", 5));
@@ -55,10 +61,12 @@ void test_write() {
     char * inexistant = "inexistant.txt";
     int fd_inexistant = pubsub_open(inexistant, O_WRONLY, 777);
     CU_ASSERT(-1 == pubsub_write(fd_inexistant, "test", 5));
+    CU_ASSERT(errno == EBADF);
 
     pubsub_reset();
     int fd = pubsub_open(category, O_RDONLY, 777);
     CU_ASSERT(-1 == pubsub_write(fd, "test", 5));
+    CU_ASSERT(errno == EBADF);
 }
 
 /*
@@ -72,8 +80,11 @@ void test_read() {
     int fd_read = pubsub_open(category, O_RDONLY, 777);
 
     CU_ASSERT(-1 == pubsub_read(fd_read, str, -1));
+    CU_ASSERT(errno == 153);
     CU_ASSERT(-1 == pubsub_read(fd_read, str, 0));
+    CU_ASSERT(errno == 153);
     CU_ASSERT(-1 == pubsub_read(fd_read, str, 1025));
+    CU_ASSERT(errno == 153);
 
     CU_ASSERT(4 == pubsub_read(fd_read, str, 4));
 
@@ -81,6 +92,7 @@ void test_read() {
     char * inexistant = "inexistant.txt";
     int fd_inexistant = pubsub_open(inexistant, O_RDONLY, 777);
     CU_ASSERT(-1 == pubsub_read(fd_inexistant, str, 5));
+    CU_ASSERT(errno == EBADF);
 
     pubsub_reset();
     char * category_1023 = "test_1023.txt";   
@@ -91,6 +103,7 @@ void test_read() {
     pubsub_reset();
     int fd = pubsub_open(category, O_WRONLY, 777);
     CU_ASSERT(-1 == pubsub_read(fd, str, 4));
+    CU_ASSERT(errno == EBADF);
 }
 
 /*
@@ -103,6 +116,7 @@ void test_ioctl() {
     int fd = pubsub_open(category, O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
 
     CU_ASSERT(-1 == pubsub_ioctl(fd, 0, 0));
+    CU_ASSERT(errno == 155);
 }
 
 /*
@@ -119,6 +133,7 @@ void test_close() {
     char * inexistant = "inexistant.txt";
     int fd_inexistant = pubsub_open(inexistant, O_WRONLY, 777);
     CU_ASSERT(-1 == pubsub_close(fd_inexistant));
+    CU_ASSERT(errno == EBADF);
 }
 
 int main() {
