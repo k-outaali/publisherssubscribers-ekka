@@ -6,6 +6,9 @@
 #define MAX_NUM_SUBS 10
 #define MAX_NUM_PUBS 10
 #define MAX_MSG_SIZE 1024
+#define PS_SUBS 100
+#define PS_PUBS 200
+#define PS_MSG 300
 
 int pubsub_open(char* p_category, int p_options, int p_mode);
 

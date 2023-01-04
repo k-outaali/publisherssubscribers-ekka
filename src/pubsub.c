@@ -133,15 +133,15 @@ int pubsub_ioctl(int p_fd, int p_request, int p_options){
             return -1;
         }  
     }
-    if(p_request == MAX_MSG_SIZE){
+    if(p_request == PS_MSG){
         max_size = p_options;
         return 0;
     }
-    else if(p_request == MAX_NUM_PUBS){
+    else if(p_request == PS_PUBS){
         max_pubs = p_options;
         return 0;
     }
-    else if(p_request == MAX_NUM_SUBS){
+    else if(p_request ==PS_SUBS){
         max_subs = p_options;
         return 0;
     }
