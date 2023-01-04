@@ -28,7 +28,7 @@ char *serr[] = {
 int pubsub_open(char* p_category, int p_options, int p_mode){
     int ret;
     if(p_options == O_RDONLY){
-        if(num_subs < MAX_NUM_SUBS ){
+        if(num_subs < max_subs ){
             ret = open(p_category, p_options, p_mode);
             if(ret != -1){
                 num_subs++;
@@ -45,7 +45,7 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
         }  
     }
     else if(p_options == O_WRONLY){
-            if(num_pubs < MAX_NUM_PUBS ){
+            if(num_pubs < max_pubs ){
                 ret = open(p_category, p_options, p_mode);
                 if(ret != -1){
                     num_pubs++;
@@ -72,7 +72,7 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
 
 int pubsub_read(int p_fd, char* p_message, int p_size){
 
-    if(p_size < 1 || p_size > MAX_MSG_SIZE){
+    if(p_size < 1 || p_size > max_size){
         errno = 153;
         return -1;
     }
@@ -86,7 +86,7 @@ int pubsub_read(int p_fd, char* p_message, int p_size){
 
 int pubsub_write(int p_fd, char* p_message, int p_size){
 
-    if(p_size < 1 || p_size > MAX_MSG_SIZE){
+    if(p_size < 1 || p_size > max_size){
         errno = 153;
         return -1;
     }
@@ -99,13 +99,13 @@ int pubsub_write(int p_fd, char* p_message, int p_size){
 
 int pubsub_close(int p_fd){
 
-    for(int i = 0; i < MAX_NUM_SUBS; i++){
+    for(int i = 0; i < max_subs; i++){
         if(p_fd == read_fds[i]){
             num_subs--;
             return close(p_fd); 
         }
     }
-    for(int i = 0; i < MAX_NUM_PUBS; i++){
+    for(int i = 0; i < max_pubs; i++){
         if(p_fd == write_fds[i]){
             num_pubs--;
             return close(p_fd); 
