@@ -127,6 +127,13 @@ int pubsub_ioctl(int p_fd, int p_request, int p_options){
             return -1;
         }  
     }
+    for(int i = 0; i < max_pubs; i++){
+        if (p_fd == write_fds[i]){
+            goto exist;  
+        }  
+    }
+    return -1;
+    exist:
     if(p_request == PS_MSG){
         max_size = p_options;
         return 0;
