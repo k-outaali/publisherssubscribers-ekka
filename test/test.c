@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define O_RDONLY 00
 #define O_WRONLY 01
