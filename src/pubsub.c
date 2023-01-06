@@ -24,13 +24,13 @@ list_t *head;
 
 int pubsub_open(char* p_category, int p_options, int p_mode){
     int ret;
+    if (open(p_category, p_options, p_mode) == -1){
+        return -1;
+    }
     if(p_options == O_RDONLY){
         //if the file is already open
         if(head == NULL){
-            head = (list_t *) malloc(sizeof(list_t));
-            if(head == NULL){
-                return 999;
-            }
+            head = (list_t *) malloc(sizeof(list_t));// NULL not checked
         }
         list_t *list = find_cat_by_name(head, p_category);
         if(list != NULL){
@@ -72,30 +72,9 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
     }
     else if(p_options == O_WRONLY){
         if(head == NULL){
-            head = (list_t *) malloc(sizeof(list_t)); // NULL not checked
-            struct cat *cat;
-            cat = (struct cat *) malloc(sizeof(struct cat)); // NULL not checked
-            cat_init(cat, p_category);
-            if(cat->num_pubs < cat->max_pubs ){
-                ret = open(p_category, p_options, p_mode);
-                if(ret != -1){
-                    cat->read_fds[cat->num_pubs] = ret;
-                    cat->num_pubs++;
-                }
-                else {
-                    return -1;
-                }
-            }
-            else{
-                errno = 151;
-                return -1;
-            }
-            push(head, cat);
+            head = (list_t *) malloc(sizeof(list_t));// NULL not checked
         }
         list_t *list = find_cat_by_name(head, p_category);
-        if(list == NULL){
-            return 999;
-        }
         if(list != NULL){
             if(list->cat->num_pubs < list->cat->max_pubs ){
                 ret = open(p_category, p_options, p_mode);
@@ -108,7 +87,7 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
                 }
             }
             else{
-                errno = 151;
+                errno = 150;
                 return -1;
             }
         }
@@ -119,7 +98,7 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
             if(cat->num_pubs < cat->max_pubs ){
                 ret = open(p_category, p_options, p_mode);
                 if(ret != -1){
-                    cat->read_fds[cat->num_pubs] = ret;
+                    cat->write_fds[cat->num_pubs] = ret;
                     cat->num_pubs++;
                 }
                 else {
@@ -127,14 +106,11 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
                 }
             }
             else{
-                errno = 151;
+                errno = 150;
                 return -1;
             }
-            if(head == NULL){
-                head = (list_t *) malloc(sizeof(list_t)); // NULL not checked
-            }
             push(head, cat);
-        }  
+        }
     }
     else 
     {
@@ -150,10 +126,11 @@ int pubsub_read(int p_fd, char* p_message, int p_size){
 
     int witch;
     list_t *ret = find_cat_by_fd(head, p_fd, &witch); 
-    if(ret == NULL || ret->cat == NULL){
-        return read(p_fd, p_message, p_size);
+    if(!(ret != NULL && ret->cat != NULL)){
+        read(p_fd, p_message, p_size);
+        return -1;
     }
-    if(p_size < 1 || p_size > ret->cat->max_size){
+    if(p_size < 1 || p_size >= ret->cat->max_size){
         errno = 153;
         return -1;
     }
@@ -169,10 +146,11 @@ int pubsub_write(int p_fd, char* p_message, int p_size){
 
     int witch;
     list_t *ret = find_cat_by_fd(head, p_fd, &witch);
-    if(ret == NULL || ret->cat == NULL){
-        return write(p_fd, p_message, p_size);
+    if(!(ret != NULL && ret->cat != NULL)){
+        write(p_fd, p_message, p_size);
+        return -1;
     }
-    if(p_size < 1 || p_size > ret->cat->max_size){
+    if(p_size < 1 || p_size >= ret->cat->max_size){
         errno = 153;
         return -1;
     }
