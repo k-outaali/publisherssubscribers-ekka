@@ -1,0 +1,8 @@
+- compiler le module avec make 
+- inserer le module au noyeau avec  sudo insmod pub.ko 
+- faire dmesg pour verifier que le chargement est bien passe 
+- faire sudo mknod /dev/pubsub0 c 240 1 pour crier un fichier de périphérique 
+- changer les droits d'acces a ce fichier avec sudo chmod 666 pubsub0
+- Écrivez un message dans le fichier de périphérique avec echo "publisher1!" > /dev/pubsub0
+- lire dans le fichier avec sudo cat /dev/pubsub0
+- test.c permet d'ouvrir le fichier pubsub3 que par 4 subscribers.
