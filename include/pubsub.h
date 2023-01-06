@@ -10,14 +10,6 @@
 #define PS_PUBS 200
 #define PS_MSG 300
 
-typedef struct cat{
-	char name[100];
-	int max_subs;
-	int max_pubs;
-	int max_size;
-	int *read_fds;
-	int *write_fds;
-}cat_t;
 
 int pubsub_open(char* p_category, int p_options, int p_mode);
 

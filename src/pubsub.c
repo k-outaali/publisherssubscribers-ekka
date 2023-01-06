@@ -2,9 +2,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 
 #include "../include/pubsub.h"
-
 #include "../include/linked_list.h"
 
 
@@ -26,15 +27,18 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
     if(p_options == O_RDONLY){
         //if the file is already open
         if(head == NULL){
-            head = (list_t *) malloc(sizeof(list_t)); // NULL not checked
+            head = (list_t *) malloc(sizeof(list_t));
+            if(head == NULL){
+                return 999;
+            }
         }
         list_t *list = find_cat_by_name(head, p_category);
         if(list != NULL){
             if(list->cat->num_subs < list->cat->max_subs ){
                 ret = open(p_category, p_options, p_mode);
                 if(ret != -1){
-                    list->cat->num_subs++;
                     list->cat->read_fds[list->cat->num_subs] = ret;
+                    list->cat->num_subs++;
                 }
                 else {
                     return -1;
@@ -52,8 +56,8 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
             if(cat->num_subs < cat->max_subs ){
                 ret = open(p_category, p_options, p_mode);
                 if(ret != -1){
-                    cat->num_subs++;
                     cat->read_fds[cat->num_subs] = ret;
+                    cat->num_subs++;
                 }
                 else {
                     return -1;
@@ -63,31 +67,48 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
                 errno = 150;
                 return -1;
             }
-            if(head == NULL){
-                head = (list_t *) malloc(sizeof(list_t)); // NULL not checked
-            }
             push(head, cat);
         }
     }
     else if(p_options == O_WRONLY){
-        //if the file is already open
         if(head == NULL){
             head = (list_t *) malloc(sizeof(list_t)); // NULL not checked
-        }
-        list_t *list = find_cat_by_name(head, p_category);
-        if(list != NULL){
-            if(list->cat->num_pubs < list->cat->max_pubs ){
+            struct cat *cat;
+            cat = (struct cat *) malloc(sizeof(struct cat)); // NULL not checked
+            cat_init(cat, p_category);
+            if(cat->num_pubs < cat->max_pubs ){
                 ret = open(p_category, p_options, p_mode);
                 if(ret != -1){
-                    list->cat->num_pubs++;
-                    list->cat->write_fds[list->cat->num_pubs] = ret;
+                    cat->read_fds[cat->num_pubs] = ret;
+                    cat->num_pubs++;
                 }
                 else {
                     return -1;
                 }
             }
             else{
-                errno = 150;
+                errno = 151;
+                return -1;
+            }
+            push(head, cat);
+        }
+        list_t *list = find_cat_by_name(head, p_category);
+        if(list == NULL){
+            return 999;
+        }
+        if(list != NULL){
+            if(list->cat->num_pubs < list->cat->max_pubs ){
+                ret = open(p_category, p_options, p_mode);
+                if(ret != -1){
+                    list->cat->write_fds[list->cat->num_pubs] = ret;
+                    list->cat->num_pubs++;
+                }
+                else {
+                    return -1;
+                }
+            }
+            else{
+                errno = 151;
                 return -1;
             }
         }
@@ -98,15 +119,15 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
             if(cat->num_pubs < cat->max_pubs ){
                 ret = open(p_category, p_options, p_mode);
                 if(ret != -1){
-                    cat->num_pubs++;
                     cat->read_fds[cat->num_pubs] = ret;
+                    cat->num_pubs++;
                 }
                 else {
                     return -1;
                 }
             }
             else{
-                errno = 150;
+                errno = 151;
                 return -1;
             }
             if(head == NULL){
@@ -128,7 +149,10 @@ int pubsub_open(char* p_category, int p_options, int p_mode){
 int pubsub_read(int p_fd, char* p_message, int p_size){
 
     int witch;
-    list_t *ret = find_cat_by_fd(head, p_fd, &witch); // NULL
+    list_t *ret = find_cat_by_fd(head, p_fd, &witch); 
+    if(ret == NULL || ret->cat == NULL){
+        return read(p_fd, p_message, p_size);
+    }
     if(p_size < 1 || p_size > ret->cat->max_size){
         errno = 153;
         return -1;
@@ -144,7 +168,10 @@ int pubsub_read(int p_fd, char* p_message, int p_size){
 int pubsub_write(int p_fd, char* p_message, int p_size){
 
     int witch;
-    list_t *ret = find_cat_by_fd(head, p_fd, &witch); // NULL
+    list_t *ret = find_cat_by_fd(head, p_fd, &witch);
+    if(ret == NULL || ret->cat == NULL){
+        return write(p_fd, p_message, p_size);
+    }
     if(p_size < 1 || p_size > ret->cat->max_size){
         errno = 153;
         return -1;
@@ -158,8 +185,11 @@ int pubsub_write(int p_fd, char* p_message, int p_size){
 
 int pubsub_close(int p_fd){
 
-    int witch;
-    list_t *ret = find_cat_by_fd(head, p_fd, &witch); // NULL
+    int witch = 0;
+    list_t *ret = find_cat_by_fd(head, p_fd, &witch);
+    if(ret == NULL || ret->cat == NULL){
+        return close(p_fd);
+    }
     int *cur = ret->cat->read_fds;
     if(witch == 100){
         for(int i = 0; i < ret->cat->max_subs; i++){
@@ -168,6 +198,7 @@ int pubsub_close(int p_fd){
             }
         }
         ret->cat->num_subs--;
+        /*
         for(int i = 0; i < ret->cat->max_subs; i++){
             if(0 != *(cur + i)){
                 return 0;
@@ -179,7 +210,8 @@ int pubsub_close(int p_fd){
                 return 0;
             }
         }
-        remove_by_index(ret, 0); //TODO 
+        remove_item(head, ret);
+        */
     }
     else if (witch == 200){
         cur = ret->cat->write_fds;
@@ -189,6 +221,7 @@ int pubsub_close(int p_fd){
             }
         }
         ret->cat->num_pubs--;
+        /*
         for(int i = 0; i < ret->cat->max_pubs; i++){
             if(0 != *(cur + i)){
                 return 0;
@@ -200,7 +233,8 @@ int pubsub_close(int p_fd){
                 return 0;
             }
         }
-        remove_by_index(ret, 0); //TODO
+        remove_item(head, ret); 
+        */
 
     }
     return close(p_fd);
@@ -209,14 +243,14 @@ int pubsub_close(int p_fd){
 
 int pubsub_ioctl(int p_fd, int p_request, int p_options){
 
-    int witch;
-    list_t *ret = find_cat_by_fd(head, p_fd, &witch);
-    if(ret == NULL){
-        return close(p_fd);
-    }
+    int witch = 0;
     if(p_options <= 0){
         errno = 155;
         return -1;
+    }
+    list_t *ret = find_cat_by_fd(head, p_fd, &witch);
+    if(ret == NULL){
+        return close(p_fd);
     }
     if(witch == 100){
         errno = 156;
@@ -243,16 +277,8 @@ int pubsub_ioctl(int p_fd, int p_request, int p_options){
 }
 
 void pubsub_reset(){
-    /*
-    num_subs = 0;
-    num_pubs = 0;
-    for(int i = 0; i < MAX_NUM_SUBS; i++){
-        read_fds[i] = 0;
-    }
-    for(int i = 0; i < MAX_NUM_PUBS; i++){
-        write_fds[i] = 0;
-    }
-    */
+    
+    free_all(head);
 }
 
 char *pubsub_get_error(){
